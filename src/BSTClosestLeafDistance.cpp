@@ -39,7 +39,33 @@ struct node{
   struct node *right;
 };
 
+int min(int a, int b){
+	if (a < b)	return a;
+	return b;
+}
+
+int near(struct node *root){
+	if (root == NULL) return 0;
+	if (root->left == NULL && root->right == NULL)	return 0;
+	return 1 + min(near(root->left), near(root->right));
+}
+
+int getClosest(struct node *root, struct node *temp, struct node *parentNodes[], int pos){
+	if (root == NULL)	return 0;
+	if (root->data == temp->data){
+		int res = near(root), iter;
+		for (iter = pos - 1; iter >= 0; iter--)
+			res = min(res, pos - iter + near(parentNodes[iter]));
+		return res;
+	}
+	parentNodes[pos] = root;
+	return min(getClosest(root->left, temp, parentNodes, pos + 1), getClosest(root->right, temp, parentNodes, pos + 1));
+}
+
 int get_closest_leaf_distance(struct node *root, struct node *temp)
 {
-  return -1;
+	if (root == NULL || temp == NULL) return -1;
+	if (temp->left == NULL && temp->right == NULL) return 0;
+	struct node *ancestors[100];
+	return getClosest(root, temp, ancestors, 0);
 }
